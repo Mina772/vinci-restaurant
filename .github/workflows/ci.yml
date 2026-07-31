@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  server:
+    name: Server — lint & test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: server
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install
+      - run: npm run lint --if-present
+      - run: npm test
+        env:
+          NODE_ENV: test
+          JWT_ACCESS_SECRET: test-access-secret-please-change-32chars
+          JWT_REFRESH_SECRET: test-refresh-secret-please-change-32char
+          MONGO_URI: mongodb://127.0.0.1:27017/vinci-test
+          COOKIE_SECRET: test-cookie-secret
+
+  client:
+    name: Client — lint & build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: client
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install
+      - run: npm run lint --if-present
+      - run: npm run build
